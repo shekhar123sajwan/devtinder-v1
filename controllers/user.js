@@ -15,34 +15,39 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "Fields not allowed!", data: [] });
     }
 
-    if (!user.password) {
-      return res.status(400).json({ message: "Password not there!", data: [] });
-    }
-
-    const sampleFile = req.files.photo;
-
-    const uploadPath =
-      __dirname +
-      "/../uploads/" +
-      new Date().getTime() +
-      "_" +
-      path.parse(sampleFile.name).name +
-      path.extname(sampleFile.name);
-
-    //Size more than 2 MB
-    if (sampleFile.size > 2048000) {
-      throw new Error("Error: File size is more that 2MB!");
-    }
-
-    sampleFile.mv(uploadPath, function (err) {
-      if (err) throw new Error(err);
-    });
+    // if (!user.password || !user.email) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Requird Fields are not there!", data: [] });
+    // }
 
     const hashPassword = await bcrypt.hash(user.password, 10);
 
     user.password = hashPassword;
 
-    const newUser = await User.create(user);
+    const newUser = new User(user);
+
+    const sampleFile = req.files.photo;
+
+    const newFileName =
+      new Date().getTime() +
+      "_" +
+      path.parse(sampleFile.name).name +
+      path.extname(sampleFile.name);
+
+    const uploadPath = __dirname + "/../uploads/" + newFileName;
+    //Size more than 2 MB
+    if (sampleFile.size > 2048000) {
+      throw new Error("Error: File size is more that 2MB!");
+    }
+
+    newUser.photoUrl = newFileName;
+
+    await newUser.save();
+
+    sampleFile.mv(uploadPath, function (err) {
+      if (err) throw new Error(err);
+    });
 
     return res
       .status(201)

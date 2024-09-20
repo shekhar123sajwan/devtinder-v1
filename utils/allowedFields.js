@@ -15,7 +15,6 @@ const userSignUpAllowedFields = (req) => {
     throw new Error("Not valid fields...");
   }
 
-  console.log(req.body);
   const isAllowed = Object.keys(req.body).every((field) =>
     allowed_fields.includes(field)
   );
